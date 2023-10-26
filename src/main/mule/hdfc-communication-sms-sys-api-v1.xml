@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <apikit:config name="hdfc-communication-sms-sys-api-v1-config" api="hdfc-communication-sms-sys-api-v1.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="hdfc-communication-sms-sys-api-v1-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="hdfc-communication-sms-sys-api-v1-config" />
+		<error-handler ref="Error_Handler" />
+    </flow>
+    <flow name="post:\smsCommunication:application\json:hdfc-communication-sms-sys-api-v1-config">
+		<logger level="INFO" doc:name="smsCommunication_MainFlow_StartLogger" doc:id="ceb54c19-6063-4bff-bb4a-8be9b797ce17" message='"Info: SMS Communication Main Flow Start":: CorrelationId: #[attributes.headers.correlationId]'/>
+		<flow-ref doc:name="FR: Cloudwatch Request Flow Ref" doc:id="1a51897d-98b6-4d6b-b595-519c752fb14a" name="cloudWatch-request-logger-subflow"/>
+		<flow-ref doc:name="FR: cf_traking_header" doc:id="12ca7488-911a-4064-9645-386de90c84bd" name="cf-tracking-header"/>
+		<flow-ref doc:name="FR: Impl_Hdfc_Cpommunication_SMS_sys_Api" doc:id="190a361d-613f-45ac-825f-d265ee4765bd" name="impl-hdfc-communication-sms-sys-api"/>
+		<flow-ref doc:name="FR: Cloudwatch Response Flow Ref" doc:id="68f0446f-343e-4732-8fb5-68dcd686c6de" name="cloudWatch-response-logger-subflow"/>
+		<logger level="INFO" doc:name="smsCommunication_MainFlow_EndLogger" doc:id="2ed64dbd-74ae-4ab4-9d38-f2a0b8e8c7a3" message='"Info: SMS Communication Main Flow END" : CorrelationId :: #[vars.vTrackingHeader.correlationId], and the Output Response :: #[payload]'/>
+    </flow>
+</mule>

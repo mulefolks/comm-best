@@ -1,0 +1,23 @@
+# Requestor Configuration
+req:
+# Header Params Declaration
+  x-api-key: "![vkSF8FUM7B169R94hxHBChMUZK5aN27Qe4bA0S3vYKw=]"
+  sProcessName: "SYSOTP"
+# Requestor Configuration
+  http:
+    host: "smsapi.hdfc.com"
+    port: "443"
+    basePath: "/SENDSMSAPI/api/values"
+    path: "/SYSOTP"
+    connectionIdleTimeout: "40000"
+    respBufferSize: "1024"
+# Requestor Reconnection
+    reconnection:
+      frequency: "3000"
+      attempts: "3"
+# Requestor TLS Config
+    tls:
+      path: "AWS_Wildcard_JAVA.jks"
+      Type: "JKS"
+      password: "![m8eDbMaqflwhhMtb7a3aOA==]"
+

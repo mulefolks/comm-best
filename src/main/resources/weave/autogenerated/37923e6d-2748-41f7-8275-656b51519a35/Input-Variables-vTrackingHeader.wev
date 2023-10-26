@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_37923e6d_2748_41f7_8275_656b51519a35_Input_Variables_vTrackingHeader = Any
+

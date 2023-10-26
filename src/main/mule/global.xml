@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d41b345b-3b7e-40b9-ba4f-dfef0d975803" basePath="${list.http.basePath}" >
+		<http:listener-connection protocol="HTTPS" host="${list.http.host}" port="${list.http.port}" connectionIdleTimeout="${list.http.connectionIdleTimeout}">
+			<reconnection >
+				<reconnect frequency="${list.http.reconnection.frequency}" count="${list.http.reconnection.attempts}" />
+			</reconnection>
+			<tls:context >
+				<tls:key-store type="${list.http.tls.Type}" path="${list.http.tls.path}" keyPassword="${secure::list.http.tls.password}" password="${secure::list.http.tls.password}" />
+			</tls:context>
+		</http:listener-connection>
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="bcdba275-97fe-4e56-9c58-1f699eab6fa9" basePath="${req.http.basePath}" >
+		<http:request-connection host="${req.http.host}" port="${req.http.port}" connectionIdleTimeout="${req.http.connectionIdleTimeout}" responseBufferSize="${req.http.respBufferSize}" protocol="HTTPS">
+			<reconnection >
+				<reconnect frequency="${req.http.reconnection.frequency}" count="${req.http.reconnection.attempts}" />
+			</reconnection>
+			<tls:context >
+				<tls:key-store type="${req.http.tls.Type}" path="${req.http.tls.path}" keyPassword="${secure::req.http.tls.password}" password="${secure::req.http.tls.password}" />
+			</tls:context>
+		</http:request-connection>
+		<http:default-headers >
+			<http:default-header key="sProcessName" value="${req.sProcessName}" />
+			<http:default-header key="x-api-key" value="${req.x-api-key}" />
+		</http:default-headers>
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="d6d11057-82c8-42d8-bb64-7c3545949199" file="properties\hdfc-communication-sms-sys-api-dev.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="dd1907b9-5b60-4b66-82cf-a7ab77b21cee" file="properties\hdfc-communication-sms-sys-api-common.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="da8ae356-0f75-4c95-939a-06e7d23e5f0c" file="properties\hdfc-communication-sms-sys-api-common.yaml" key="${mule.key}" />
+	<secure-properties:config name="Secure_Properties_Config1" doc:name="Secure Properties Config" doc:id="8c7358d1-92c5-461e-bb15-a0b8b008221b" file="properties\hdfc-communication-sms-sys-api-${mule.env}.yaml" key="${mule.key}" />
+	<import doc:name="Import" doc:id="a908db52-6b27-46aa-a0b5-845cb42536cd" file="errorhandler.xml" />
+	<api-gateway:autodiscovery apiId="18313106" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="ffdc9d73-0660-4370-bf87-2d3f455597a1" flowRef="hdfc-communication-sms-sys-api-v1-main"/>
+</mule>

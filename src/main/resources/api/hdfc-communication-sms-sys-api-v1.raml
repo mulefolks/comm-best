@@ -1,0 +1,27 @@
+#%RAML 1.0
+title: hdfc-communication-sms-sys-api-v1
+version: v1.0
+baseUri: http://localhost:8081/clps/Nonindv/v1/api
+protocols:
+  - HTTPS
+mediaType: 
+- application/json
+resourceTypes:
+  postCollectionResource: !include Resource/UpsertResourceType.raml
+  
+uses:
+  errorDataType: Library/ErrorDataType/ErrorDataType .raml
+  RespSMSCOM: Library/ResponseDataType/smsCommincationResponseDataType.raml
+  ReqSMSCOM: Library/RequestDataType/smsCommunicationRequestDataType.raml
+traits:
+  authHeaders: !include Traits/Headers/Headers.raml
+/smsCommunication:
+  is:
+    - authHeaders
+  type:
+    postCollectionResource:
+      errors-schema: errorDataType.error
+      request-schema: ReqSMSCOM.input
+      request-example: !include Examples/requestExample/smsCommunicationRequest.json
+      response-schema: RespSMSCOM.output
+      response-example: !include Examples/responseExample/successResponse/smsCommunicationSuccessResponse.json

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<sub-flow name="impl-hdfc-communication-sms-sys-api" doc:id="37923e6d-2748-41f7-8275-656b51519a35">
+		<logger level="INFO" doc:name="Impl-communication-sms-subFlow_StartLogger" doc:id="261f0874-1a11-4d8b-8ce1-1326312188f6" message='"INFO: implementation communication-sms SubFlow Start" :: CorrelationId:  #[vars.vTrackingHeader.correlationId]' />
+		<choice doc:name="Choice" doc:id="1aaa2ca2-94f1-4bf6-a0fc-0b16ba1f5e39">
+			<when expression="#[%dw 2.0&#10;output application/json&#10;---&#10;( ! isEmpty(payload.mobileNumber) and (! isEmpty(payload.message)))]">
+				<flow-ref doc:name="Flow Reference" doc:id="02883ec1-9790-4a25-9479-2140748c8127" name="Implementation-hdfc-communication-sms-sys-api-v1Sub_Flow"/>
+				<ee:transform doc:name="DW: Requestor final Communication-sms Output Transfromation" doc:id="c99519e9-f91c-426e-bd09-fab628d688f3" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var vOutPayload = read(payload.Result)
+---
+if(((vOutPayload..StatusCode reduce (($$ + $))) == "SENT"))(
+{
+	"timestamp": (now () >> 'IST') as String {format: "dd-MM-YYYY hh:mm:ss a"},
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": 101,
+	"statusMessage": vOutPayload..StatusCode reduce (($$ + $)),
+	"RefNo": vOutPayload..refno reduce (($$ + $))
+}) else if(((vOutPayload..StatusCode reduce (($$ + $))) == "FAIL"))( {
+	"timestamp": (now () >> 'IST') as String {format: "dd-MM-YYYY hh:mm:ss a"},
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": 102,
+	"statusMessage": vOutPayload..StatusCode reduce (($$ + $)),
+	"RefNo": vOutPayload..refno reduce (($$ + $))
+}) else ({"timestamp": (now () >> 'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": 102,
+	"Result": vOutPayload})
+
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+
+
+
+</when>
+			<when expression="#[(! isEmpty(payload.good))]">
+				<http:request method="POST" doc:name="Request" doc:id="74b07d88-850f-4c00-96f4-befb2b9cd7fd" config-ref="HTTP_Request_configuration" path="${req.http.path}" />
+			</when>
+			<otherwise>
+				<ee:transform doc:name="DW: Default Router Communication-sms Flow Transformer" doc:id="0e1e69f3-79a0-46ce-9e16-55538e616fac">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timestamp": now(),
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,    
+    "statusCode": 103,
+    "errMsg": "Please Enter valid input"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Impl-communication-sms-subFlow_EndLogger" doc:id="62cb90b9-7679-45ab-99d8-37e9fdb2b045" message='"INFO: Communication-sms SubFlow End":: CorrelationId:  #[vars.vTrackingHeader.correlationId]' />
+		
+	</sub-flow>
+	<sub-flow name="Implementation-hdfc-communication-sms-sys-api-v1Sub_Flow" doc:id="95d0b850-5bea-47da-a846-92728b13798e" >
+		<ee:transform doc:name="Transform Message" doc:id="672f5f34-e634-4883-ba8c-d4f088561608" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+	"Result": "{\"OBJECT\":[{\"ReturnMsg\":[{\"StatusCode\":\"SUCCESS\",\"Message\":\"Sent.\",\"refno\":\"1509202216080686GbJNAK9949572632123400\"}]}]}"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+
+</mule>

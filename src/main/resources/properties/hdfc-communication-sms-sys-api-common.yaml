@@ -1,0 +1,19 @@
+# Listner Configurations
+list:
+  http:
+    host: "0.0.0.0"
+    port: "8092"
+    basePath: "/comm/v1"
+    path: ""
+# Listner ConnectionTimeOut configs
+    connectionIdleTimeout: "40000"
+# Listner Reconnection configs
+    reconnection:
+      frequency: "3000"
+      attempts: "3"
+# Listner TLS configs
+    tls:
+      path: "Wildcard_AWS_LZt.jks"
+      Type: "JKS"
+      password: "![wsroVXz51o4r9mCAXWGZzg==]"
+    

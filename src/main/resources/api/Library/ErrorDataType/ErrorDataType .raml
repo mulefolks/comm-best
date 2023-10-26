@@ -1,0 +1,21 @@
+#%RAML 1.0 Library
+types:
+  error:
+    type: object
+    properties:
+      success:
+        description: success Flag
+        type: boolean
+        required: true
+      errors:
+        type: array
+        items:
+          properties:
+            error_code:
+              description: unique error Code
+              type: string
+              required: false
+            error_message:
+              description: it gave a message associate with the Error Code
+              type: string
+              required: false
